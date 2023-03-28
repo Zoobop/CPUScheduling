@@ -1,6 +1,6 @@
-package Task.Base;
+package Task.Scheduling;
 
-import Task.Utility.SchedulerInfo;
+import Task.Base.IScheduler;
 
 public final class Scheduler implements IScheduler {
 

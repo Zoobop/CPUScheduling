@@ -1,7 +1,6 @@
-import Task.MultiCore.MultiCoreSchedulingTask;
-import Task.Utility.SchedulerInfo;
-import Task.Utility.SchedulingPolicy;
-import Task.SingleCore.SingleCoreSchedulingTask;
+import Task.Scheduling.SchedulerInfo;
+import Task.Scheduling.SchedulingPolicy;
+import Task.Scheduling.SchedulingTask;
 import Task.Base.Task;
 
 import java.util.Objects;
@@ -14,25 +13,39 @@ public final class Main {
         Integer cores = null;
         Integer quantum = null;
 
+        // Parse through command line arguments
         var i = 0;
         while (i < args.length) {
 
             switch (args[i++]) {
                 case "-S" -> {
+                    // Throw if argument already accounted for
                     if (schedulePolicy != null) throw new Exception();
 
+                    // Get policy from int
                     final var policyArg = args[i++];
                     schedulePolicy = SchedulingPolicy.values()[Integer.parseInt(policyArg)-1];
 
+                    // Get time quantum argument, if applicable
                     if (Objects.equals(policyArg, "2")) {
                         quantum = Integer.parseInt(args[i++]);
+
+                        // Throw if not within bounds [2-10]
+                        if (quantum < 2 || quantum > 10)
+                            throw new Exception();
                     }
                 }
                 case "-C" -> {
+                    // Throw if argument accounted for
                     if (cores != null) throw new Exception();
 
+                    // Get core count as int
                     final var coreArg = args[i++];
                     cores = Integer.parseInt(coreArg);
+
+                    // Throw if not within bounds [2-10]
+                    if (cores < 1 || cores > 4)
+                        throw new Exception();
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + args[i]);
             }
@@ -53,10 +66,8 @@ public final class Main {
             // Get scheduler info from command line arguments
             final var schedulerInfo = ParseArgs(args);
 
-            // Get task based on core count
-            currentTask = schedulerInfo.Cores > 1 ?
-                    new MultiCoreSchedulingTask(schedulerInfo) : // Multi core task
-                    new SingleCoreSchedulingTask(schedulerInfo); // Single core task
+            // Create scheduling task from info
+            currentTask = new SchedulingTask(schedulerInfo);
         }
         catch (Exception ex)
         {

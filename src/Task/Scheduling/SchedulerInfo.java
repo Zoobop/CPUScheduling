@@ -1,7 +1,6 @@
-package Task.Utility;
+package Task.Scheduling;
 
 public final class SchedulerInfo {
-
     public final SchedulingPolicy Policy;
     public final int Cores;
     public final int Quantum;
@@ -10,5 +9,10 @@ public final class SchedulerInfo {
         Policy = policy;
         Cores = cores;
         Quantum = quantum;
+    }
+
+    @Override
+    public String toString() {
+        return "Process Scheduling [%d Core(s)]".formatted(Cores);
     }
 }

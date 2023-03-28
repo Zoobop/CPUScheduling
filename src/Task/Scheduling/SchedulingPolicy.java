@@ -1,4 +1,4 @@
-package Task.Utility;
+package Task.Scheduling;
 
 public enum SchedulingPolicy {
     FCFS("First Come First Served (FCFS)"),

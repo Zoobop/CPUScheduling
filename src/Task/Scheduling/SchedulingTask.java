@@ -1,16 +1,14 @@
-package Task.MultiCore;
+package Task.Scheduling;
 
 import Task.Base.IScheduler;
-import Task.Base.Scheduler;
 import Task.Base.Task;
-import Task.Utility.SchedulerInfo;
 
-public final class MultiCoreSchedulingTask extends Task {
+public final class SchedulingTask extends Task {
 
     private final IScheduler scheduler;
 
-    public MultiCoreSchedulingTask(SchedulerInfo schedulerInfo) {
-        super("Multi-Core Scheduling (%d Cores)".formatted(schedulerInfo.Cores));
+    public SchedulingTask(SchedulerInfo schedulerInfo) {
+        super(schedulerInfo.toString());
 
         scheduler = new Scheduler(schedulerInfo);
     }
