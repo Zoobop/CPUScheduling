@@ -7,12 +7,14 @@ public class queueData {
     int remainingBurst;
     int queuePlacement;
     boolean run=false;
+    int arrivalTime;
 
     boolean running=false;
-    queueData(int burst, int placement){
+    queueData(int burst, int placement,int arrivalTime){
         this.maxBurst=burst;
         this.remainingBurst=burst;
         this.queuePlacement=placement;
+        this.arrivalTime=arrivalTime;
     }
 
     public int getRemainingBurst(){
@@ -27,7 +29,13 @@ public class queueData {
     public void setRemainingBurst(int subtract){
         this.remainingBurst=remainingBurst-subtract;
     }
+    public int getArrivalTime(){
+        return this.arrivalTime;
+    }
 
+    public void setArrivalTime(int arrivalTime){
+        this.arrivalTime=arrivalTime;
+    }
     public boolean hasRun(){
         return this.run;
     }

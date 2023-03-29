@@ -57,6 +57,27 @@ public class dispatcherThread implements Runnable{
         }
         return queueplacement;
     }
+    public boolean hasNextPreempt(){
+        for(int i=0; i<ReadyQueue.size(); i++){
+            if(arrivalTime[ReadyQueue.get(i).getQueuePlacement()]<=timeCount){
+                return true;
+            }
+        }
+        return false;
+    }
+    public int getNextPreempt(){
+        int shortest=5000;
+        int queueplacement=0;
+        for(int i=0; i<ReadyQueue.size(); i++){
+            if(arrivalTime[ReadyQueue.get(i).getQueuePlacement()]<=timeCount){
+                if(ReadyQueue.get(i).getRemainingBurst()<shortest){
+                    shortest=ReadyQueue.get(i).getRemainingBurst();
+                    queueplacement=i;
+                }
+            }
+        }
+        return queueplacement;
+    }
     public int getNextAvailable(){
         int queueplacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
@@ -193,6 +214,48 @@ public class dispatcherThread implements Runnable{
                     }
 
                 }
+
+            }
+
+            case Preemptive -> {
+                while(taskCounter>0){
+                    queueSem.acquireUninterruptibly();
+                    if(hasNextPreempt()){
+                        int readyplacement=getNextPreempt();
+                        int burst=ReadyQueue.get(readyplacement).getRemainingBurst();
+                        int placement=ReadyQueue.get(readyplacement).getQueuePlacement();
+                        dispatchToCPU(burst,placement);
+                        System.out.println("Dispatcher " + this.coreNum + " Dispatches Task " + placement + " For " + burst + " Bursts of time");
+                        taskStartSem[placement].release();
+                        queueSem.release();
+                        taskFinishSem[placement].acquireUninterruptibly();
+                        queueSem.acquireUninterruptibly();
+                        if(interrupted){
+                            System.out.println("Task "+placement+" interrupted after "+interruptTime+" bursts");
+                            System.out.println("Dispatcher "+this.coreNum+" Checking Ready Queue");
+                            ReadyQueue.get(readyplacement).setRemainingBurst(interruptTime);
+                            interrupted=false;
+                        }
+                        else{
+                            System.out.println("Task "+placement+" Finished and Removed from Ready Queue");
+                            ReadyQueue.remove(readyplacement);
+                            taskCounter--;
+                        }
+                    }else{
+                        int smallest=5000;
+                        for(int i=0; i<ReadyQueue.size(); i++){
+                            if(ReadyQueue.get(i).getArrivalTime()<smallest){
+                                smallest=ReadyQueue.get(i).getArrivalTime();
+                            }
+                        }
+                        int difference=smallest-timeCount;
+                        System.out.println("Dispatcher waits for "+difference+" bursts");
+                        timeCount=smallest;
+                    }
+                    queueSem.release();
+
+                }
+
 
             }
         }

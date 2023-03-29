@@ -15,9 +15,20 @@ public class taskThread implements Runnable{
 
         while(remainingBurst>0){
             taskStartSem[this.placement].acquireUninterruptibly();
+            interruptTime=0;
             for(int i=0; i<allocatedBurst[placement]; i++){
                 if(remainingBurst>0){
                     this.remainingBurst--;
+                    interruptTime++;
+                    timeCount++;
+                    for(int j=0; j<arrivalTime.length; j++){
+                        if(timeCount==arrivalTime[j]&&this.remainingBurst!=0){
+                            arrivalTime[j]=0;
+                            interrupted=true;
+                            taskFinishSem[this.placement].release();
+                            i=allocatedBurst[placement];
+                        }
+                    }
                 }
             }
             System.out.println("Task "+placement+" Ran for "+allocatedBurst[placement]+" Cycles");
