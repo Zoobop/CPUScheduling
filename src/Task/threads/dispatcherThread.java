@@ -7,10 +7,10 @@ import static Task.Scheduling.SchedulingTask.*;
 public class dispatcherThread implements Runnable{
 
 
-    int coreNum;
-    static int count=0;
-    int quantum;
-    SchedulingPolicy policy;
+    int coreNum;//number of cores
+    static int count=0;//
+    int quantum;//
+    SchedulingPolicy policy;//which algorithm to use
 
     //initializer for non RR
     public dispatcherThread(int coreNum, SchedulingPolicy policy){
@@ -47,7 +47,7 @@ public class dispatcherThread implements Runnable{
         return false;
     }
     public int getNextRR(){
-        int queueplacement=0;
+        int queuePlacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
             if(!ReadyQueue.get(i).isRunning()&&!ReadyQueue.get(i).hasRun()){
                 ReadyQueue.get(i).switchRun();
@@ -55,7 +55,7 @@ public class dispatcherThread implements Runnable{
                 return i;
             }
         }
-        return queueplacement;
+        return queuePlacement;
     }
     public boolean hasNextPreempt(){
         for(int i=0; i<ReadyQueue.size(); i++){
@@ -67,38 +67,38 @@ public class dispatcherThread implements Runnable{
     }
     public int getNextPreempt(){
         int shortest=5000;
-        int queueplacement=0;
+        int queuePlacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
             if(arrivalTime[ReadyQueue.get(i).getQueuePlacement()]<=timeCount){
                 if(ReadyQueue.get(i).getRemainingBurst()<shortest){
                     shortest=ReadyQueue.get(i).getRemainingBurst();
-                    queueplacement=i;
+                    queuePlacement=i;
                 }
             }
         }
-        return queueplacement;
+        return queuePlacement;
     }
     public int getNextAvailable(){
-        int queueplacement=0;
+        int queuePlacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
             if(!ReadyQueue.get(i).isRunning()){
                 ReadyQueue.get(i).switchRunning();
                 return i;
             }
         }
-        return queueplacement;
+        return queuePlacement;
     }
     public int getShortest(){
         int shortestBurst=3000;
-        int queueplacement=0;
+        int queuePlacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
             if(ReadyQueue.get(i).getRemainingBurst()<shortestBurst&&!ReadyQueue.get(i).isRunning()){
                 shortestBurst=ReadyQueue.get(i).getRemainingBurst();
-                queueplacement=i;
+                queuePlacement=i;
             }
         }
-        ReadyQueue.get(queueplacement).switchRunning();
-        return queueplacement;
+        ReadyQueue.get(queuePlacement).switchRunning();
+        return queuePlacement;
     }
     public int getPlacement(int placement){
         for(int i=0; i<ReadyQueue.size(); i++){
