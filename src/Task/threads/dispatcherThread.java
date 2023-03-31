@@ -8,8 +8,8 @@ public class dispatcherThread implements Runnable{
 
 
     int coreNum;//number of cores
-    static int count=0;//
-    int quantum;//
+    static int count=0;//keep track of what is in the ready queue
+    int quantum;//time period for round-robin
     SchedulingPolicy policy;//which algorithm to use
 
     //initializer for non RR
@@ -111,6 +111,7 @@ public class dispatcherThread implements Runnable{
     @Override
     public void run() {
         switch(this.policy){
+            //First Come, First Served: first to arrive in the ready queue is first on the "cpu"
             case FCFS -> {
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
@@ -139,23 +140,24 @@ public class dispatcherThread implements Runnable{
 
                 }
             }
+            //Non-Preemptive Shortest Job First: Shortest job in the ready queue goes first cannot be switched until it completes
             case NonPreemptive -> {
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
                     if(hasNext()) {
-                        int readyplacement = getShortest();
-                        int burst = ReadyQueue.get(readyplacement).getMaxBurst();
-                        int placement = ReadyQueue.get(readyplacement).getQueuePlacement();
-                        ReadyQueue.get(readyplacement).setRemainingBurst(burst);
+                        int readyPlacement = getShortest();
+                        int burst = ReadyQueue.get(readyPlacement).getMaxBurst();
+                        int placement = ReadyQueue.get(readyPlacement).getQueuePlacement();
+                        ReadyQueue.get(readyPlacement).setRemainingBurst(burst);
                         dispatchToCPU(burst, placement);
                         System.out.println("Dispatcher " + this.coreNum + " Dispatches Task " + placement + " For " + burst + " Bursts of time");
                         taskStartSem[placement].release();
                         queueSem.release();
                         taskFinishSem[placement].acquireUninterruptibly();
                         queueSem.acquireUninterruptibly();
-                        readyplacement=getPlacement(placement);
+                        readyPlacement=getPlacement(placement);
                         System.out.println("Task " + placement + " Removed from ready queue");
-                        ReadyQueue.remove(readyplacement);
+                        ReadyQueue.remove(readyPlacement);
                         queueSem.release();
                         counterSem.acquireUninterruptibly();
                         taskCounter--;
@@ -168,27 +170,29 @@ public class dispatcherThread implements Runnable{
                 }
 
             }
+            //Round Robin: running time on the cpu is determined by a time slice. if a thread does
+            //not finish in time, it goes back in the ready queue to run for its remaining time.
             case RoundRobin -> {
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
                     if(hasNextRR()) {
-                        int readyplacement = getNextRR();
+                        int readyPlacement = getNextRR();
                         int burst = quantum;
-                        int placement = ReadyQueue.get(readyplacement).getQueuePlacement();
-                        ReadyQueue.get(readyplacement).setRemainingBurst(burst);
+                        int placement = ReadyQueue.get(readyPlacement).getQueuePlacement();
+                        ReadyQueue.get(readyPlacement).setRemainingBurst(burst);
                         dispatchToCPU(burst, placement);
                         System.out.println("Dispatcher " + this.coreNum + " Dispatches Task " + placement + " For " + burst + " Bursts of time");
                         taskStartSem[placement].release();
                         queueSem.release();
                         taskFinishSem[placement].acquireUninterruptibly();
                         queueSem.acquireUninterruptibly();
-                        readyplacement=getPlacement(placement);
-                        if(ReadyQueue.get(readyplacement).getRemainingBurst()<=0){
+                        readyPlacement=getPlacement(placement);
+                        if(ReadyQueue.get(readyPlacement).getRemainingBurst()<=0){
                             System.out.println("Task " + placement + " Removed from ready queue");
-                            ReadyQueue.remove(readyplacement);
+                            ReadyQueue.remove(readyPlacement);
                             taskCounter--;
                         }else{
-                            ReadyQueue.get(readyplacement).switchRunning();
+                            ReadyQueue.get(readyPlacement).switchRunning();
                         }
                         queueSem.release();
                         counterSem.acquireUninterruptibly();
@@ -216,14 +220,15 @@ public class dispatcherThread implements Runnable{
                 }
 
             }
-
+            //Preemptive Shortest Job First: Shortest job in the ready queue goes first and can be kicked out if another,
+            //shorter job comes along with a burst time that is less than the thread's remaining time.
             case Preemptive -> {
                 while(taskCounter>0){
                     queueSem.acquireUninterruptibly();
                     if(hasNextPreempt()){
-                        int readyplacement=getNextPreempt();
-                        int burst=ReadyQueue.get(readyplacement).getRemainingBurst();
-                        int placement=ReadyQueue.get(readyplacement).getQueuePlacement();
+                        int readyPlacement=getNextPreempt();
+                        int burst=ReadyQueue.get(readyPlacement).getRemainingBurst();
+                        int placement=ReadyQueue.get(readyPlacement).getQueuePlacement();
                         dispatchToCPU(burst,placement);
                         System.out.println("Dispatcher " + this.coreNum + " Dispatches Task " + placement + " For " + burst + " Bursts of time");
                         taskStartSem[placement].release();
@@ -233,12 +238,12 @@ public class dispatcherThread implements Runnable{
                         if(interrupted){
                             System.out.println("Task "+placement+" interrupted after "+interruptTime+" bursts");
                             System.out.println("Dispatcher "+this.coreNum+" Checking Ready Queue");
-                            ReadyQueue.get(readyplacement).setRemainingBurst(interruptTime);
+                            ReadyQueue.get(readyPlacement).setRemainingBurst(interruptTime);
                             interrupted=false;
                         }
                         else{
                             System.out.println("Task "+placement+" Finished and Removed from Ready Queue");
-                            ReadyQueue.remove(readyplacement);
+                            ReadyQueue.remove(readyPlacement);
                             taskCounter--;
                         }
                     }else{

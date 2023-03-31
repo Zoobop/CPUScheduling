@@ -3,11 +3,11 @@ package Task.Scheduling;
 import Task.threads.taskThread;
 
 public class queueData {
-    int maxBurst;
-    int remainingBurst;
-    int queuePlacement;
-    boolean run=false;
-    int arrivalTime;
+    int maxBurst;//highest burst time
+    int remainingBurst;//how much burst time remains
+    int queuePlacement;//where in the ready queue the thread is
+    boolean run=false;//whether a thread is running
+    int arrivalTime;//time arrived in the ready queue
 
     boolean running=false;
     queueData(int burst, int placement,int arrivalTime){

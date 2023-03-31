@@ -5,15 +5,16 @@ import Task.threads.taskThread;
 import Task.threads.dispatcherThread;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SchedulingTask extends Task {
     //dispatch thread while loop condition
-    public static int taskCounter;
-    public static int[] arrivalTime;
-    public static int timeCount;
-    public static boolean interrupted;
+    public static int taskCounter;//keep track of how many tasks
+    public static int[] arrivalTime;//times threads arrive in the ready queue
+    public static int timeCount;//keep track of time the program has been running(to compare with arrival times)
+    public static boolean interrupted;//whether a run has been interrupted
     public static int interruptTime=0;
     //separated the info from the thread itself, this simulates the queue
     public static ArrayList<queueData> ReadyQueue=new ArrayList<>();
@@ -21,7 +22,7 @@ public final class SchedulingTask extends Task {
     public static Semaphore counterSem=new Semaphore(1);
     //semaphore for signaling from task to dispatcher
     public static Semaphore[] taskFinishSem;
-    //semaphore for accessing readyqueue
+    //semaphore for accessing ready queue
     public static Semaphore queueSem=new Semaphore(1);
     //semaphore for signaling from dispatcher to task
     public static Semaphore[] taskStartSem;
@@ -45,45 +46,40 @@ public final class SchedulingTask extends Task {
     @Override
     protected void Simulate() {
 
-        int threadcount= ThreadLocalRandom.current().nextInt(1,26);
-        arrivalTime=new int[threadcount];
-        taskStartSem=new Semaphore[threadcount];
-        taskFinishSem=new Semaphore[threadcount];
-        taskCounter=threadcount;
-        allocatedBurst=new int[threadcount];
-        System.out.println("Creating "+threadcount+" New Threads");
+        int threadCount = ThreadLocalRandom.current().nextInt(1,26);
+        arrivalTime=new int[threadCount];
+        taskStartSem=new Semaphore[threadCount];
+        taskFinishSem=new Semaphore[threadCount];
+        taskCounter=threadCount;
+        allocatedBurst=new int[threadCount];
+        System.out.println("Creating "+threadCount+" New Threads");
 
-        switch(scheduler.getPolicy()) {
-            case Preemptive -> {
-                for (int i = 0; i < threadcount; i++) {
-                    int arrival=ThreadLocalRandom.current().nextInt(0,200);
-                    arrivalTime[i]=arrival;
-                    allocatedBurst[i] = 0;
-                    taskStartSem[i] = new Semaphore(0);
-                    taskFinishSem[i] = new Semaphore(0);
-                    int burst = ThreadLocalRandom.current().nextInt(1, 51);
-                    taskThread task = new taskThread(i, burst);
-                    Thread thread = new Thread(task);
-                    thread.start();
-                    queueData data = new queueData(burst, i,arrival);
-                    ReadyQueue.add(data);
-                }
-
-
+        if (Objects.requireNonNull(scheduler.getPolicy()) == SchedulingPolicy.Preemptive) {
+            for (int i = 0; i < threadCount; i++) {
+                int arrival = ThreadLocalRandom.current().nextInt(0, 200);
+                arrivalTime[i] = arrival;
+                allocatedBurst[i] = 0;
+                taskStartSem[i] = new Semaphore(0);
+                taskFinishSem[i] = new Semaphore(0);
+                int burst = ThreadLocalRandom.current().nextInt(1, 51);
+                taskThread task = new taskThread(i, burst);
+                Thread thread = new Thread(task);
+                thread.start();
+                queueData data = new queueData(burst, i, arrival);
+                ReadyQueue.add(data);
             }
-            default -> {
-                for (int i = 0; i < threadcount; i++) {
-                    arrivalTime[i]=0;
-                    allocatedBurst[i] = 0;
-                    taskStartSem[i] = new Semaphore(0);
-                    taskFinishSem[i] = new Semaphore(0);
-                    int burst = ThreadLocalRandom.current().nextInt(1, 51);
-                    taskThread task = new taskThread(i, burst);
-                    Thread thread = new Thread(task);
-                    thread.start();
-                    queueData data = new queueData(burst, i,0);
-                    ReadyQueue.add(data);
-                }
+        } else {
+            for (int i = 0; i < threadCount; i++) {
+                arrivalTime[i] = 0;
+                allocatedBurst[i] = 0;
+                taskStartSem[i] = new Semaphore(0);
+                taskFinishSem[i] = new Semaphore(0);
+                int burst = ThreadLocalRandom.current().nextInt(1, 51);
+                taskThread task = new taskThread(i, burst);
+                Thread thread = new Thread(task);
+                thread.start();
+                queueData data = new queueData(burst, i, 0);
+                ReadyQueue.add(data);
             }
         }
         System.out.println("-----------Ready Queue----------------");
@@ -92,24 +88,20 @@ public final class SchedulingTask extends Task {
         }
         System.out.println("--------------------------------------");
 
-        switch(scheduler.getPolicy()){
-            case RoundRobin ->{
-                for(int i=0; i<scheduler.getCores(); i++){
-                    System.out.println("Dispatching Core "+(i+1));
-                    dispatcherThread dispatch=new dispatcherThread(i,scheduler.getPolicy(), scheduler.getQuantum());
-                    Thread dthread=new Thread(dispatch);
-                    dthread.start();
-                }
+        if (Objects.requireNonNull(scheduler.getPolicy()) == SchedulingPolicy.RoundRobin) {
+            for (int i = 0; i < scheduler.getCores(); i++) {
+                System.out.println("Dispatching Core " + (i + 1));
+                dispatcherThread dispatch = new dispatcherThread(i, scheduler.getPolicy(), scheduler.getQuantum());
+                Thread dthread = new Thread(dispatch);
+                dthread.start();
             }
-            default -> {
-                for(int i=0; i<scheduler.getCores(); i++){
-                    System.out.println("Dispatching Core "+(i+1));
-                    dispatcherThread dispatch=new dispatcherThread(i,scheduler.getPolicy());
-                    Thread dthread=new Thread(dispatch);
-                    dthread.start();
-                }
+        } else {
+            for (int i = 0; i < scheduler.getCores(); i++) {
+                System.out.println("Dispatching Core " + (i + 1));
+                dispatcherThread dispatch = new dispatcherThread(i, scheduler.getPolicy());
+                Thread dthread = new Thread(dispatch);
+                dthread.start();
             }
-
         }
 
     }
