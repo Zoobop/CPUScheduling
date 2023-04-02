@@ -2,6 +2,8 @@ package Task.threads;
 
 import Task.Scheduling.SchedulingPolicy;
 
+import javax.sound.midi.SysexMessage;
+
 import static Task.Scheduling.SchedulingTask.*;
 
 public class dispatcherThread implements Runnable{
@@ -225,6 +227,12 @@ public class dispatcherThread implements Runnable{
             case Preemptive -> {
                 while(taskCounter>0){
                     queueSem.acquireUninterruptibly();
+                    System.out.println("Time Count: "+timeCount);
+                    System.out.println("-----------Ready Queue----------------");
+                    for(int i=0; i<ReadyQueue.size(); i++){
+                        System.out.println("ID: "+ReadyQueue.get(i).getQueuePlacement()+", Max Burst: "+ReadyQueue.get(i).getMaxBurst()+", Current Burst: "+ReadyQueue.get(i).getRemainingBurst()+", Arrival Time: "+ReadyQueue.get(i).getArrivalTime());
+                    }
+                    System.out.println("--------------------------------------");
                     if(hasNextPreempt()){
                         int readyPlacement=getNextPreempt();
                         int burst=ReadyQueue.get(readyPlacement).getRemainingBurst();
