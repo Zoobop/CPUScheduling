@@ -69,7 +69,7 @@ public class dispatcherThread implements Runnable{
         int shortest=5000;
         int queueplacement=0;
         for(int i=0; i<ReadyQueue.size(); i++){
-            if(arrivalTime[ReadyQueue.get(i).getQueuePlacement()]<=timeCount){
+            if(arrivalTime[ReadyQueue.get(i).getQueuePlacement()]<=timeCount&&arrivalTime[ReadyQueue.get(i).getQueuePlacement()]>=0){
                 if(ReadyQueue.get(i).getRemainingBurst()<shortest){
                     shortest=ReadyQueue.get(i).getRemainingBurst();
                     queueplacement=i;
@@ -221,6 +221,12 @@ public class dispatcherThread implements Runnable{
                 while(taskCounter>0){
                     queueSem.acquireUninterruptibly();
                     if(hasNextPreempt()){
+                        System.out.println("Time Count: "+timeCount);
+                        System.out.println("-----------Ready Queue----------------");
+                        for(int i=0; i<ReadyQueue.size(); i++){
+                            System.out.println("ID: "+ReadyQueue.get(i).getQueuePlacement()+", Max Burst: "+ReadyQueue.get(i).getMaxBurst()+", Current Burst: "+ReadyQueue.get(i).getRemainingBurst()+", Arrival Time: "+ReadyQueue.get(i).getArrivalTime());
+                        }
+                        System.out.println("--------------------------------------");
                         int readyplacement=getNextPreempt();
                         int burst=ReadyQueue.get(readyplacement).getRemainingBurst();
                         int placement=ReadyQueue.get(readyplacement).getQueuePlacement();
@@ -250,7 +256,9 @@ public class dispatcherThread implements Runnable{
                         }
                         int difference=smallest-timeCount;
                         System.out.println("Dispatcher waits for "+difference+" bursts");
+                        counterSem.acquireUninterruptibly();
                         timeCount=smallest;
+                        counterSem.release();
                     }
                     queueSem.release();
 
