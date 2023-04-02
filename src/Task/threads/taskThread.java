@@ -25,13 +25,14 @@ public class taskThread implements Runnable{
                         if(timeCount==arrivalTime[j]&&this.remainingBurst!=0){
                             arrivalTime[j]=0;
                             interrupted=true;
-                            taskFinishSem[this.placement].release();
                             i=allocatedBurst[placement];
                         }
                     }
                 }
             }
-            System.out.println("Task "+placement+" Ran for "+allocatedBurst[placement]+" Cycles");
+            if(!interrupted) {
+                System.out.println("Task " + placement + " Ran for " + allocatedBurst[placement] + " Cycles");
+            }
             taskFinishSem[this.placement].release();
         }
         System.out.println("Task "+this.placement+" Complete");
