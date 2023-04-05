@@ -115,6 +115,7 @@ public class dispatcherThread implements Runnable{
         switch(this.policy){
             //First Come, First Served: first to arrive in the ready queue is first on the "cpu"
             case FCFS -> {
+                //long start = System.currentTimeMillis();
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
                     if(hasNext()) {
@@ -141,9 +142,12 @@ public class dispatcherThread implements Runnable{
                     }
 
                 }
+              //  long end = System.currentTimeMillis();
+               // System.out.println("took" + (end-start));
             }
             //Non-Preemptive Shortest Job First: Shortest job in the ready queue goes first cannot be switched until it completes
             case NonPreemptive -> {
+                //long start = System.currentTimeMillis();
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
                     if(hasNext()) {
@@ -170,11 +174,13 @@ public class dispatcherThread implements Runnable{
                     }
 
                 }
-
+               // long end = System.currentTimeMillis();
+              //  System.out.println("took" + (end-start));
             }
             //Round Robin: running time on the cpu is determined by a time slice. if a thread does
             //not finish in time, it goes back in the ready queue to run for its remaining time.
             case RoundRobin -> {
+              //  long start = System.currentTimeMillis();
                 while(taskCounter>0) {
                     queueSem.acquireUninterruptibly();
                     if(hasNextRR()) {
@@ -220,11 +226,13 @@ public class dispatcherThread implements Runnable{
                     }
 
                 }
-
+              //  long end = System.currentTimeMillis();
+              //  System.out.println("took" + (end-start));
             }
             //Preemptive Shortest Job First: Shortest job in the ready queue goes first and can be kicked out if another,
             //shorter job comes along with a burst time that is less than the thread's remaining time.
             case Preemptive -> {
+              //  long start = System.currentTimeMillis();
                 while(taskCounter>0){
                     queueSem.acquireUninterruptibly();
                     System.out.println("Time Count: "+timeCount);
@@ -268,7 +276,8 @@ public class dispatcherThread implements Runnable{
                     queueSem.release();
 
                 }
-
+               // long end = System.currentTimeMillis();
+               // System.out.println("took" + (end-start));
 
             }
         }

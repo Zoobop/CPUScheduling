@@ -55,33 +55,37 @@ public final class SchedulingTask extends Task {
         System.out.println("Creating "+threadCount+" New Threads");
 
         if (Objects.requireNonNull(scheduler.getPolicy()) == SchedulingPolicy.Preemptive) {
-            for (int i = 0; i < threadCount; i++) {
-                int arrival = ThreadLocalRandom.current().nextInt(0, 200);
-                arrivalTime[i] = arrival;
-                allocatedBurst[i] = 0;
-                taskStartSem[i] = new Semaphore(0);
-                taskFinishSem[i] = new Semaphore(0);
-                int burst = ThreadLocalRandom.current().nextInt(1, 51);
-                taskThread task = new taskThread(i, burst);
-                Thread thread = new Thread(task);
-                thread.start();
-                queueData data = new queueData(burst, i, arrival);
-                ReadyQueue.add(data);
+
+                for (int i = 0; i < threadCount; i++) {
+                    int arrival = ThreadLocalRandom.current().nextInt(0, 200);
+                    arrivalTime[i] = arrival;
+                    allocatedBurst[i] = 0;
+                    taskStartSem[i] = new Semaphore(0);
+                    taskFinishSem[i] = new Semaphore(0);
+                    int burst = ThreadLocalRandom.current().nextInt(1, 51);
+
+                    taskThread task = new taskThread(i, burst);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                    queueData data = new queueData(burst, i, arrival);
+                    ReadyQueue.add(data);
+                }
             }
-        } else {
-            for (int i = 0; i < threadCount; i++) {
-                arrivalTime[i] = 0;
-                allocatedBurst[i] = 0;
-                taskStartSem[i] = new Semaphore(0);
-                taskFinishSem[i] = new Semaphore(0);
-                int burst = ThreadLocalRandom.current().nextInt(1, 51);
-                taskThread task = new taskThread(i, burst);
-                Thread thread = new Thread(task);
-                thread.start();
-                queueData data = new queueData(burst, i, 0);
-                ReadyQueue.add(data);
+            else{
+                for (int i = 0; i < threadCount; i++) {
+                    arrivalTime[i] = 0;
+                    allocatedBurst[i] = 0;
+                    taskStartSem[i] = new Semaphore(0);
+                    taskFinishSem[i] = new Semaphore(0);
+                    int burst = ThreadLocalRandom.current().nextInt(1, 51);
+                    taskThread task = new taskThread(i, burst);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                    queueData data = new queueData(burst, i, 0);
+                    ReadyQueue.add(data);
+                }
             }
-        }
+
         System.out.println("-----------Ready Queue----------------");
         for(int i=0; i<ReadyQueue.size(); i++){
             System.out.println("ID: "+ReadyQueue.get(i).getQueuePlacement()+", Max Burst: "+ReadyQueue.get(i).getMaxBurst()+", Current Burst: "+ReadyQueue.get(i).getRemainingBurst()+", Arrival Time: "+ReadyQueue.get(i).getArrivalTime());
