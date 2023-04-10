@@ -1,20 +1,21 @@
 package Task.Scheduling;
 
-import Task.threads.taskThread;
+public final class QueueData {
+    private final int maxBurst;//highest burst time
+    private int remainingBurst;//how much burst time remains
+    private final int queuePlacement;//where in the ready queue the thread is
+    private boolean run;//whether a thread is running
+    private int arrivalTime;//time arrived in the ready queue
+    private boolean running;
 
-public class queueData {
-    int maxBurst;//highest burst time
-    int remainingBurst;//how much burst time remains
-    int queuePlacement;//where in the ready queue the thread is
-    boolean run=false;//whether a thread is running
-    int arrivalTime;//time arrived in the ready queue
-
-    boolean running=false;
-    queueData(int burst, int placement,int arrivalTime){
+    QueueData(int burst, int placement, int arrivalTime){
         this.maxBurst=burst;
         this.remainingBurst=burst;
         this.queuePlacement=placement;
         this.arrivalTime=arrivalTime;
+
+        run = false;
+        running = false;
     }
 
     public int getRemainingBurst(){
@@ -27,7 +28,7 @@ public class queueData {
         return this.maxBurst;
     }
     public void setRemainingBurst(int subtract){
-        this.remainingBurst=remainingBurst-subtract;
+        this.remainingBurst -= subtract;
     }
     public int getArrivalTime(){
         return this.arrivalTime;
@@ -40,13 +41,13 @@ public class queueData {
         return this.run;
     }
     public void switchRun(){
-        this.run=!this.run;
+        this.run = !this.run;
     }
     public boolean isRunning(){
         return this.running;
     }
     public void switchRunning(){
-        this.running=!this.running;
+        this.running = !this.running;
     }
 
 }

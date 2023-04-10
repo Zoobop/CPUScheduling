@@ -45,7 +45,7 @@ public final class Main {
                     final var coreArg = args[i++];
                     cores = Integer.parseInt(coreArg);
 
-                    // Throw if not within bounds [2-10]
+                    // Throw if not within bounds [1-4]
                     if (cores < 1 || cores > 4)
                         throw new Exception();
                 }
