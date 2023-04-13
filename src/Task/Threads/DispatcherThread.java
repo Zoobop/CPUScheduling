@@ -65,12 +65,14 @@ public final class DispatcherThread implements Runnable{
     public int getNextPreempt() {
         var shortest = 5000;
         var queuePlacement = 0;
+        var arrivaltime=5000;
         for(var i = 0; i < ReadyQueue.size(); i++) {
             final var data = ReadyQueue.get(i);
             if(arrivalTime[data.getQueuePlacement()] <= timeCount) {
-                if(data.getRemainingBurst() < shortest){
+                if(data.getRemainingBurst() < shortest && arrivaltime>arrivalTime[data.getQueuePlacement()]){
                     shortest = data.getRemainingBurst();
                     queuePlacement=i;
+                    arrivaltime=arrivalTime[data.getQueuePlacement()];
                 }
             }
         }

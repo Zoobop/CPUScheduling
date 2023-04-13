@@ -65,7 +65,7 @@ public final class SchedulingTask extends Task {
 
         for (var i = 0; i < threadCount; i++) {
             // Sets the task variables and initializes its semaphores
-            arrivalTime[i] = isPreemptive ? ThreadLocalRandom.current().nextInt(0, 200) : 0;
+            arrivalTime[i] = isPreemptive ? ThreadLocalRandom.current().nextInt(0, 50) : 0;
             allocatedBurst[i] = 0;
             taskStartSem[i] = new Semaphore(0);
             taskFinishSem[i] = new Semaphore(0);

@@ -23,6 +23,7 @@ public final class TaskThread implements Runnable{
                     this.remainingBurst--;
                     interruptTime++;
                     timeCount++;
+                    System.out.println("Task "+placement+" Runs for Cycle "+interruptTime);
 
                     for(var j = 0; j < arrivalTime.length; j++) {
                         if(timeCount==arrivalTime[j] && remainingBurst != 0){
